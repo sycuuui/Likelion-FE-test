@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session4</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        Kakao.init('5a0ceb9e10878825aea4875de3a5a176');
+        Kakao.isInitialized();
+    </script>
+</head>
+<body>
+    <div class="header">
+        <img id="logo" src="img/logo.png" alt="로고">
+    </div>
+
+    <div class="content" id="start">
+        <p>나와 어울리는 놀이기구는?</p>
+        <img src="img/main.png" />
+        <button id="startBtn" type="button" class="btn btn-warning btn-lg" onclick="start();">시작하기</button>
+        <a id="kakao-login-btn" href="javascript:loginWithKakao()">
+          <button id="startBtn" style="width: 100%;" type="button" class="btn btn-warning btn-lg mt-2" onclick="start();">로그인</button>
+        </a>
+    </div>
+
+    <div class="content" id="question">
+        <p id="pgrNum">1/3</p>
+        <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning mt-100" role="progressbar" style="width: calc(100/3*1%)"></div>
+        </div>
+        <p id="title" style="font-size: 1.5rem;">문제</p>
+        <input id="type" type="hidden" value="AN">
+        <button id="A" type="button" class="btn btn-outline-warning btn-lg" style="height: auto;font-size: 1.2rem; padding: 1rem;">Info</button>
+        <button id="B" type="button" class="btn btn-outline-warning btn-lg mt-3" style="height:auto; font-size: 1.2rem; padding: 1rem;">Info</button>
+    </div>
+
+    <div class="content" id="result">
+        <img id="img">
+        <p id="ride" style="font-size: 2rem">놀이기구 이름</p>
+        <div style="word-break:break-all; padding:2rem; margin:5vh 0 5vh 0; border: 1px solid orange; border-radius: 5px;">
+            <span id="explain" style="font-size: 1.5rem">설명</span>
+        </div>
+        <div class="resultBtn">
+            <button type="button" id="replay" class="btn btn-warning" onclick="window.location.reload();">다시하기</button>
+            <button type="button" id="copy" class="btn btn-warning mt-2" role="alert" onclick="copy()">링크복사</button>
+            <a id="kakaotalk-sharing-btn" href="javascript:shareMessage()"><button type="button" id="share" class="btn btn-warning mt-2" style="width: 100%;">공유하기</button></a>
+        </div>
+        <p class="maker">Developer 김지원, 이서연</p>
+    </div>
+
+    <input type="hidden" id="AN" value="0">
+    <input type="hidden" id="SN" value="0">
+    <input type="hidden" id="EN" value="0">
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script>
+        $("#question").hide();
+        $("#result").hide();
+
+        var num =1;
+        var q = {
+            1: {"title": "전자레인지에 불닭볶음면을 넣고 3분을 돌린 당신.", "type": "AN", "A": "전자레인지 앞을 들락날락 하면서 계속 몇 초 남았는지 확인한다.", "B": "다른 일을 하고 있다가 '삐삐삐-' 소리가 들리면 가서 꺼낸다."},
+            2: {"title": "수업이 끝났다. 배가 꼬르륵 거린다.", "type": "SN", "A": "혼밥은 싫으니 친구를 1시간 기다렸다가 같이 먹는다.", "B": "혼밥을 야무지게 먹는다."}, 
+            3: {"title": "지금 무슨노래 듣고계세요?", "type": "EN", "A": '"뉴진스의 hype boy요."라고 대답한 후 춤을 춘다.', "B": "에?"}, 
+        }
+        var result = {
+            "ASE":{"ride": "길이 없으면 만들어서라도! 대담한 지도자 '범퍼카'", "explain": "관대하고 개방적이라 사람, 사물에 대한 선입견이 별로 없습니다. 강한 현실 감각으로 타협책을 모색하며, 문제를 해결하는 능력이 뛰어납니다. 긴 설명을 읽기보다는 직접 경험하는 것을 좋아합니다. 활동적이고 장기적인 계획과 거시적 비전을 선호하는 편입니다. 지식에 대한 욕구와 관심이 많으며 특히 직관력을 사용해서 지적인 자극을 주는 새로운 아이디어에 높은 관심을 가지고 있습니다. 그에 반해, 추상적인 아이디어나 개념에 대해서는 별로 흥미가 없는 편입니다. 즉, 현실적이고 실용적인 면에서 분석적인 자세를 보인다고 할 수 있죠. 당찬 성격에 사람을 잘 다루며, 어려운 도전을 마다하지 않고 즐깁니다. 또한 일과 친하다 보니 성실합니다.", "img":"img/bumper-car.png"},
+            "ASN":{"ride": "집중력 최강! 만능재주꾼 '사격'", "explain": "당신은 낙천적으로 보일지 몰라도 속으로는 이런 저런 고민이 많은 사람입니다. 생각보다 감정이 풍부하고 고민도 많은 편입니다. 가능한 에너지 소비를 하지 않으려 하며, 일과 관계되지 않는 이상 어떤 상황이나 인간관계에 직접 뛰어들지 않습니다. 자신의 경계선 안으로 들어온 사람에게는 장난이 많고 따뜻한 면이 있으나, 그렇지 않은 사람에게는 무관심으로 일관하는 경향이 있습니다. 인생을 관찰하고, 상황을 파악하는 민감성과 도구를 다루는 뛰어난 능력이 있습니다.", "img":"img/water-gun.png"},
+            "ANE":{"ride": "열정빼면 시체! 자유로운 활동가 '퍼레이드'", "explain": "쉬는 날 당신은 혼자 방에 있기보다는 친구들과의 시간을 즐깁니다. 당신에게는 이런 시간들이 행복이고 에너지를 충전하는 시간이거든요. 사교적이고 활동적이며 낙천적입니다. 어떤 상황이든 잘 적응하며 현실적인 사람입니다. 주위의 사람이나 일어나는 일에 대하여 관심이 많습니다. 때로는 수다스럽고, 진지함이 결여되거나 마무리를 등한시하는 경향이 있으나, 어떤 조직체나 공동체에서 밝고 재미있는 분위기 조성 역할을 잘한다고 볼 수 있습니다. 또한 본인이 무엇을 좋아하고 싫어하는지가 분명해 본인의 인생을 자유롭게 잘 즐길 줄 아는 유형이라고 볼 수 있습니다.", "img":"img/parade.png"},
+            "ANN":{"ride": "도움이 필요하면 어디든! 따뜻한 마음의 소유자 '사파리'", "explain": "당신은 다정하고 온화하며 사람들에게 친절합니다. 의견 충돌을 피하는 편이고 인화를 중시합니다. 인간과 관계되는 일을 할 때 때로는 감정에 지나치게 민감한 경향이 있습니다. 당신은 직장에서도 사랑받고 가까운 사람들에게도 사랑받는 사람입니다. 성실하고 친구들이 많고 책임감 있고 스스로에 대한 자부심도 있는 편이거든요. 목표를 높게 세우고 그 목표를 잡을 수 있는 의지도 가지고 있는 당신입니다. ", "img":"img/safari.png"},
+            "NSE":{"ride": "뭉치면 살고 흩어지면 죽는다! 현실감각 짱 '롤러코스터'", "explain": "당신은 맡은 일은 끝까지 해내는 책임감에 진심인 사람입니다. 일을 허투루 하는 것을 싫어해서 몸이 힘들어도 할 때는 확실하게 끝냅니다. 다만 평일에 에너지를 쏟다보니 주말에는 혼자 뒹굴거리는 시간이 필요합니다. 친구와 놀 때도 사람 많은 핫플레이스에 가기보다 야경보면서 드라이브하는 걸 더 좋아하는 편입니다. 이야기하기를 즐기며 정리 정돈을 잘하고, 참을성이 많고 다른 사람들을 잘 도와줍니다. 일이나 사람 관련 문제에 대하여 냉철한 입장을 취하기 어려워합니다. 반대 의견에 부딪혔을 때나, 자신의 요구가 거절당했을 때 마음의 상처를 잘 받습니다.", "img":"img/roller-coaster.png"},
+            "NSN":{"ride": "이상적인 세계를 꿈꾼다! 열정적인 전략가 '바이킹'", "explain": "누군가와 함께 있을 때보다 혼자 있을 때가 자연스럽고 편안한 사람입니다. 체력이 많이 떨어지는 편이라 남들과 똑같은 하루를 보내도 더 빨리 지치는 편입니다. 왁자지껄한 것을 별로 좋아하지도 않고 누군가를 이기려고 이를 갈지도 않습니다. 그저 강물 흐르는 대로 마음 편한대로 사는게 제일이라고 생각하는 편입니다. 퇴근 후에는 유튜브나 넷플릭스 프로를 보며 휴식을 취하는 것을 선호합니다. 당신이 자주 보는 친구가 있다면 그 친구는 당신과 매우 비슷한 성향을 가진 사람일 가능성이 큽니다.", "img":"img/ship.png"},
+            "NNE":{"ride": "모든게 다 궁금한 호기심 왕! 논쟁을 즐기는 '회전목마'", "explain": "당신의 인간관계는 넓고 깊습니다. 사교적이고 책임감도 강하고 발랄한 사람이라서 어디서 무슨 일을 하든 성공할 가능성이 높습니다. 사람들을 만나는 걸 좋아하긴 하지만 그냥 아무나 만나진 않습니다. 말도 잘 통해야 하고 특히 당신의 감정을 잘 이해할 수 있는 사람이어야 하죠. 말을 함부로 하거나 남을 배려하지 않는 사람은 질색입니다.", "img":"img/carousel.png"},
+            "NNN":{"ride": "난 다 좋아! 둥글둥글한 '관람차'", "explain": "당신은 소위 사람들이 말하는 인싸는 아니지만 많은 사람들이 당신을 편안해합니다. 둥글둥글하고 무던한 성격 덕분이지요. 또한 비전을 가지고 중장기 계획을 짤 줄 알고, 당신과 생각이 다른 동료들과도 좋은 관계를 유지합니다. 당신은 또한 상상력이 풍부한 아티스트의 영혼을 가지고 있어요. 그러다보니 일반적인 직장에서 열정을 느끼기보다는 따분함을 느끼곤 합니다. 1등을 하기보다는 혼자 여행을 가거나 당신만의 공간에서 당신만의 취미에 푹 빠질 때 진정한 행복을 느끼는 사람입니다.", "img":"img/ferris-wheel.png"},
+        }
+
+        function start() {
+            $("#start").hide();
+            $("#question").show();
+            next();
+        }
+        $("#A").click(function(){
+            var type=$("#type").val();
+            var preValue =$("#"+type).val();
+            $("#"+type).val(parseInt(preValue)+1);
+            console.log($("#"+type).val(parseInt(preValue)+1));
+            next();
+        });
+        $("#B").click(function(){
+            next();
+        });
+        function next(){
+            if(num==4){
+                $("#question").hide();
+                $("#result").show();
+                var mbti="";
+                ($("#AN").val()<1) ? mbti+="N" : mbti+="A";
+                ($("#SN").val()<1) ? mbti+="N" : mbti+="S";
+                ($("#EN").val()<1) ? mbti+="N" : mbti+="E";
+                $("#img").attr("src",result[mbti]["img"]);
+                $("#ride").html(result[mbti]["ride"]);
+                $("#explain").html(result[mbti]["explain"]);
+            }
+            else{
+                $(".progress-bar").attr('style',' width: calc(100/3*'+num+'%)');
+                $("#pgrNum").html(num+'/3');
+                $("#title").html(q[num]["title"]);
+                $("#type").val(q[num]["type"]);
+                $("#A").html(q[num]["A"]);
+                $("#B").html(q[num]["B"]);
+                num++;
+            }
+        }
+        function copy(){
+            var url = '';
+            var textarea = document.createElement("textarea");
+            document.body.appendChild(textarea);
+            url = window.document.location.href;
+            textarea.value = url;
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            alert("링크가 복사되었습니다.")
+        }
+    </script>
+
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.1.0/kakao.min.js"
+  integrity="sha384-dpu02ieKC6NUeKFoGMOKz6102CLEWi9+5RQjWSV0ikYSFFd8M3Wp2reIcquJOemx" crossorigin="anonymous"></script>
+<script>
+  Kakao.init('be75fd6e35075efca758e4a3f04a7479'); // 사용하려는 앱의 JavaScript 키 입력
+</script>
+
+<script>
+  function shareMessage() {
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: '놀이기구 테스트',
+        description: '나랑 잘 어울리는 놀이기구는?',
+        imageUrl:
+          'https://ifh.cc/g/khVZma.png',
+        link: {
+          // [내 애플리케이션] > [플랫폼] 에서 등록한 사이트 도메인과 일치해야 함
+          webUrl: 'https://session4-mbti.netlify.app/',
+        },
+      },
+      buttons: [
+        {
+          title: '웹으로 보기',
+          link: {
+            webUrl: 'https://session4-mbti.netlify.app/',
+          },
+        },
+      ],
+    });
+  }
+</script>
+
+
+<p id="token-result"></p>
+
+<script>
+  function loginWithKakao() {
+    Kakao.Auth.authorize({
+      redirectUri: 'https://session4-mbti.netlify.app/oauth',
+    });
+  }
+
+  // 아래는 데모를 위한 UI 코드입니다.
+  displayToken()
+  function displayToken() {
+    var token = getCookie('authorize-access-token');
+
+    if(token) {
+      Kakao.Auth.setAccessToken(token);
+      Kakao.Auth.getStatusInfo()
+        .then(function(res) {
+          if (res.status === 'connected') {
+            document.getElementById('token-result').innerText
+              = 'login success, token: ' + Kakao.Auth.getAccessToken();
+          }
+        })
+        .catch(function(err) {
+          Kakao.Auth.setAccessToken(null);
+        });
+    }
+  }
+
+  function getCookie(name) {
+    var parts = document.cookie.split(name + '=');
+    if (parts.length === 2) { return parts[1].split(';')[0]; }
+  }
+</script>
+</body>
+</html>
